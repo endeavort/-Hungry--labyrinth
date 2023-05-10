@@ -24,6 +24,7 @@ ANIMATION = [0, 1, 0, 2]  # アニメーション番号
 
 phase = 0  # フェーズ
 tmr = 0  # タイマー
+stage = 1  # ステージ
 score = 0  # スコア
 candy = 0  # キャンディ
 
@@ -36,6 +37,8 @@ pl_a = 0  # 画像番号
 # 敵
 red_x = 0  # 位置ｘ
 red_y = 0  # 位置ｙ
+red_sx = 0  # 初期位置x
+red_sy = 0  # 初期位置y
 red_d = 0  # 向き
 red_a = 0  # 画像番号
 
@@ -43,18 +46,54 @@ red_a = 0  # 画像番号
 # ステージ設定処理
 def set_stage():
     global map_data, candy
-    map_data = [
-        [0, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 0],
-        [0, 2, 3, 3, 2, 1, 1, 2, 3, 3, 2, 0],
-        [0, 3, 0, 0, 3, 3, 3, 3, 0, 0, 3, 0],
-        [0, 3, 1, 1, 3, 0, 0, 3, 1, 1, 3, 0],
-        [0, 3, 2, 2, 3, 0, 0, 3, 2, 2, 3, 0],
-        [0, 3, 0, 0, 3, 1, 1, 3, 0, 0, 3, 0],
-        [0, 3, 1, 1, 3, 3, 3, 3, 1, 1, 3, 0],
-        [0, 2, 3, 3, 2, 0, 0, 2, 3, 3, 2, 0],
-        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    ]
-    candy = 32
+    global red_sx, red_sy
+
+    if stage == 1:
+        map_data = [
+            [0, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 0],
+            [0, 2, 3, 3, 2, 1, 1, 2, 3, 3, 2, 0],
+            [0, 3, 0, 0, 3, 3, 3, 3, 0, 0, 3, 0],
+            [0, 3, 1, 1, 3, 0, 0, 3, 1, 1, 3, 0],
+            [0, 3, 2, 2, 3, 0, 0, 3, 2, 2, 3, 0],
+            [0, 3, 0, 0, 3, 1, 1, 3, 0, 0, 3, 0],
+            [0, 3, 1, 1, 3, 3, 3, 3, 1, 1, 3, 0],
+            [0, 2, 3, 3, 2, 0, 0, 2, 3, 3, 2, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        ]
+        candy = 32
+        red_sx = 630
+        red_sy = 450
+    if stage == 2:
+        map_data = [
+            [0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+            [0, 2, 2, 2, 3, 3, 3, 3, 2, 2, 2, 0],
+            [0, 3, 3, 0, 2, 1, 1, 2, 0, 3, 3, 0],
+            [0, 3, 3, 1, 3, 3, 3, 3, 1, 3, 3, 0],
+            [0, 2, 1, 3, 3, 3, 3, 3, 3, 1, 2, 0],
+            [0, 3, 3, 0, 3, 3, 3, 3, 0, 3, 3, 0],
+            [0, 3, 3, 1, 2, 1, 1, 2, 1, 3, 3, 0],
+            [0, 2, 2, 2, 3, 3, 3, 3, 2, 2, 2, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        ]
+        candy = 38
+        red_sx = 630
+        red_sy = 90
+
+    if stage == 3:
+        map_data = [
+            [0, 1, 0, 1, 0, 1, 1, 1, 1, 1, 1, 0],
+            [0, 2, 1, 3, 1, 2, 2, 3, 3, 3, 3, 0],
+            [0, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 0],
+            [0, 2, 1, 1, 1, 2, 2, 1, 1, 1, 1, 0],
+            [0, 2, 2, 2, 2, 3, 3, 2, 2, 2, 2, 0],
+            [0, 1, 1, 2, 0, 2, 2, 0, 1, 1, 2, 0],
+            [0, 3, 3, 3, 1, 1, 1, 0, 3, 3, 3, 0],
+            [0, 3, 3, 3, 2, 2, 2, 0, 3, 3, 3, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        ]
+        candy = 23
+        red_sx = 630
+        red_sy = 450
 
 
 # キャラのスタート位置処理
@@ -65,8 +104,8 @@ def set_chara_pos():
     pl_y = 90
     pl_d = DIR[1]
     pl_a = 3
-    red_x = 630
-    red_y = 450
+    red_x = red_sx
+    red_y = red_sy
     red_d = DIR[1]
     red_a = 3
 
@@ -86,6 +125,8 @@ def draw_screen():
     canvas.create_image(red_x, red_y, image=img_red[red_a], tag="SCREEN")
     # スコア描画
     draw_txt("SCORE " + str(score), 200, 30, 30, "white")
+    # ステージ数描画処理
+    draw_txt("STAGE " + str(stage), 520, 30, 30, "lime")
 
 
 # 文字描画処理
@@ -207,7 +248,7 @@ def move_enemy():
 
 # メインループ
 def main():
-    global key, koff, tmr, phase, score
+    global key, koff, tmr, phase, score, stage
     tmr += 1
     draw_screen()
 
@@ -218,6 +259,7 @@ def main():
             draw_txt("Press SPSCE !", 360, 380, 30, "yellow")
         if key == "space":
             score = 0
+            stage = 1
             set_stage()
             set_chara_pos()
             phase = 1
@@ -238,9 +280,18 @@ def main():
 
     # ステージクリア
     if phase == 4:
-        draw_txt("STAGE CLEAR", 360, 270, 40, "pink")
-        if tmr == 50:
-            phase = 0
+        if stage < 3:
+            draw_txt("STAGE CLEAR", 360, 270, 40, "pink")
+        else:
+            draw_txt("ALL STAGE CLEAR!", 360, 270, 40, "violet")
+        if tmr == 30:
+            if stage < 3:
+                stage += 1
+                set_stage()
+                set_chara_pos()
+                phase = 1
+            else:
+                phase = 0
     if koff:
         key = ""
         koff = False
