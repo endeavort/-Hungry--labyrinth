@@ -22,6 +22,7 @@ DIR = [0, 1, 2, 3]  # 向き[上,下,左,右]
 ANIMATION = [0, 1, 0, 2]  # アニメーション番号
 
 tmr = 0  # タイマー
+score = 0  # スコア
 
 # プレイヤー
 pl_posx = 90  # 位置ｘ
@@ -54,6 +55,14 @@ def draw_screen():
             )
     # プレイヤー描画
     canvas.create_image(pl_posx, pl_posy, image=img_pl[pl_a], tag="SCREEN")
+    draw_txt("SCORE " + str(score), 200, 30, 30, "white")
+
+
+# 文字描画処理
+def draw_txt(txt, x, y, siz, col):
+    fnt = ("Times New Roman", siz, "bold")
+    canvas.create_text(x + 2, y + 2, text=txt, fill="black", font=fnt, tag="SCREEN")
+    canvas.create_text(x, y, text=txt, fill=col, font=fnt, tag="SCREEN")
 
 
 # 壁を調べる処理
@@ -100,7 +109,7 @@ def check_wall(cx, cy, di, dot=20):
 
 # プレイヤーの移動処理
 def move_pl():
-    global pl_posx, pl_posy, pl_d, pl_a
+    global pl_posx, pl_posy, pl_d, pl_a, score
     # 上キー
     if key == "Up":
         pl_d = 0
@@ -123,6 +132,11 @@ def move_pl():
             pl_posx += 20
     # アニメーション番号の計算
     pl_a = pl_d * 3 + ANIMATION[tmr % 4]
+    mx = int(pl_posx / 60)
+    my = int(pl_posy / 60)
+    if map_data[my][mx] == 3:
+        score += 100
+        map_data[my][mx] = 2
 
 
 # メインループ
