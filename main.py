@@ -21,6 +21,7 @@ def key_up(e):
 
 DIR = [0, 1, 2, 3]  # 向き[上,下,左,右]
 ANIMATION = [0, 1, 0, 2]  # アニメーション番号
+BLINK = ["#fff", "#ffc", "#ff8", "#fe4", "#ff8", "#ffc"]
 
 phase = 0  # フェーズ
 tmr = 0  # タイマー
@@ -51,6 +52,8 @@ white_sy = 0  # 初期位置y
 white_d = 0  # 向き
 white_sd = 0  # 初期向き
 white_a = 0  # 画像番号
+
+map_data = []  # 迷路用のリスト
 
 
 # ステージ設定処理
@@ -111,6 +114,43 @@ def set_stage():
         red_sy = 450
         white_sx = 330
         white_sy = 270
+        white_sd = DIR[3]
+    if stage == 4:
+        map_data = [
+            [0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+            [0, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 0],
+            [0, 3, 0, 3, 3, 1, 3, 0, 3, 0, 3, 0],
+            [0, 3, 1, 0, 3, 3, 3, 0, 3, 1, 3, 0],
+            [0, 3, 3, 0, 1, 1, 1, 0, 3, 3, 3, 0],
+            [0, 3, 0, 1, 3, 3, 3, 1, 3, 1, 1, 0],
+            [0, 3, 1, 3, 3, 1, 3, 3, 3, 3, 3, 0],
+            [0, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        ]
+        candy = 50
+        red_sx = 150
+        red_sy = 270
+        white_sx = 510
+        white_sy = 270
+        white_sd = DIR[0]
+
+    if stage == 5:
+        map_data = [
+            [0, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+            [0, 2, 0, 3, 3, 3, 3, 3, 3, 3, 3, 0],
+            [0, 2, 0, 3, 0, 1, 3, 3, 1, 0, 3, 0],
+            [0, 2, 0, 3, 0, 3, 3, 3, 3, 0, 3, 0],
+            [0, 2, 1, 3, 1, 1, 3, 3, 1, 1, 3, 0],
+            [0, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3, 0],
+            [0, 2, 1, 1, 1, 1, 2, 1, 1, 1, 1, 0],
+            [0, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        ]
+        candy = 40
+        red_sx = 630
+        red_sy = 450
+        white_sx = 390
+        white_sy = 210
         white_sd = DIR[3]
 
 
@@ -321,7 +361,7 @@ def main():
             draw_txt("Press SPSCE !", 360, 380, 30, "yellow")
         if key == "space":
             score = 0
-            stage = 2
+            stage = 4
             set_stage()
             set_chara_pos()
             phase = 1
@@ -355,18 +395,34 @@ def main():
 
     # ステージクリア
     if phase == 4:
-        if stage < 3:
+        if stage < 5:
             draw_txt("STAGE CLEAR", 360, 270, 40, "pink")
         else:
             draw_txt("ALL STAGE CLEAR!", 360, 270, 40, "violet")
         if tmr == 30:
-            if stage < 3:
+            if stage < 5:
                 stage += 1
                 set_stage()
                 set_chara_pos()
                 phase = 1
             else:
-                phase = 0
+                phase = 5
+                tmr = 0
+
+    # エンディング
+    if phase == 5:
+        if tmr < 60:
+            xr = 8 * tmr
+            yr = 6 * tmr
+            canvas.create_oval(
+                360 - xr, 270 - yr, 360 + xr, 270 + yr, fill="black", tag="SCREEN"
+            )
+        else:
+            canvas.create_rectangle(0, 0, 720, 540, fill="black", tag="SCREEN")
+            canvas.create_image(360, 300, image=img_ending, tag="SCREEN")
+            draw_txt("Congratulations!", 360, 160, 40, BLINK[tmr % 6])
+        if tmr == 300:
+            idx = 0
     if koff:
         key = ""
         koff = False
@@ -422,6 +478,8 @@ img_white = [
 ]
 # タイトル
 img_title = tkinter.PhotoImage(file="images/title.png")
+# エンディング
+img_ending = tkinter.PhotoImage(file="images/ending.png")
 
 root.title("はらはら　ペンギン　ラビリンス")  # タイトル
 root.resizable(False, False)  # ウィンドウサイズ変更不可
