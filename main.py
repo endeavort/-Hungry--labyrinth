@@ -57,31 +57,43 @@ def draw_screen():
 
 
 # 壁を調べる処理
-def check_wall(cx, cy, di):
+def check_wall(cx, cy, di, dot=20):
     chk = False
     # 上向きの時
     if di == DIR[0]:
-        mx = int(cx / 60)
-        my = int((cy - 60) / 60)
-        if map_data[my][mx] <= 1:
+        mx = int((cx - 30) / 60)
+        my = int((cy - 30 - dot) / 60)
+        if map_data[my][mx] <= 1:  # 左上
+            chk = True
+        mx = int(((cx + 29) / 60))
+        if map_data[my][mx] <= 1:  # 右上
             chk = True
     # 下向きの時
     if di == DIR[1]:
-        mx = int(cx / 60)
-        my = int((cy + 60) / 60)
-        if map_data[my][mx] <= 1:
+        mx = int((cx - 30) / 60)
+        my = int((cy + 29 + dot) / 60)
+        if map_data[my][mx] <= 1:  # 左下
+            chk = True
+        mx = int(((cx + 29) / 60))
+        if map_data[my][mx] <= 1:  # 右下
             chk = True
     # 左向きの時
     if di == DIR[2]:
-        mx = int((cx - 60) / 60)
-        my = int(cy / 60)
-        if map_data[my][mx] <= 1:
+        mx = int((cx - 30 - dot) / 60)
+        my = int((cy - 30) / 60)
+        if map_data[my][mx] <= 1:  # 左上
+            chk = True
+        my = int(((cy + 29) / 60))
+        if map_data[my][mx] <= 1:  # 左下
             chk = True
     # 右向きの時
     if di == DIR[3]:
-        mx = int((cx + 60) / 60)
-        my = int(cy / 60)
-        if map_data[my][mx] <= 1:
+        mx = int((cx + 29 + dot) / 60)
+        my = int((cy - 30) / 60)
+        if map_data[my][mx] <= 1:  # 右上
+            chk = True
+        mx = int(((cy + 29) / 60))
+        if map_data[my][mx] <= 1:  # 右下
             chk = True
     return chk
 
@@ -93,22 +105,22 @@ def move_pl():
     if key == "Up":
         pl_d = 0
         if check_wall(pl_posx, pl_posy, DIR[0]) == False:
-            pl_posy -= 60
+            pl_posy -= 20
     # 下キー
     if key == "Down":
         pl_d = 1
         if check_wall(pl_posx, pl_posy, DIR[1]) == False:
-            pl_posy += 60
+            pl_posy += 20
     # 左キー
     if key == "Left":
         pl_d = 2
         if check_wall(pl_posx, pl_posy, DIR[2]) == False:
-            pl_posx -= 60
+            pl_posx -= 20
     # 右キー
     if key == "Right":
         pl_d = 3
         if check_wall(pl_posx, pl_posy, DIR[3]) == False:
-            pl_posx += 60
+            pl_posx += 20
     # アニメーション番号の計算
     pl_a = pl_d * 3 + ANIMATION[tmr % 4]
 
@@ -122,7 +134,7 @@ def main():
     if koff:
         key = ""
         koff = False
-    root.after(300, main)  # 300ミリ秒後にmain関数を実行
+    root.after(100, main)  # 300ミリ秒後にmain関数を実行
 
 
 root = tkinter.Tk()  # ウィンドウの作成
