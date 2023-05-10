@@ -33,8 +33,9 @@ pl_x = 0  # 位置ｘ
 pl_y = 0  # 位置ｙ
 pl_d = 1  # 向き
 pl_a = 0  # 画像番号
+life = 3  # ライフ
 
-# 敵
+# 敵1
 red_x = 0  # 位置ｘ
 red_y = 0  # 位置ｙ
 red_sx = 0  # 初期位置x
@@ -42,11 +43,21 @@ red_sy = 0  # 初期位置y
 red_d = 0  # 向き
 red_a = 0  # 画像番号
 
+# 敵2
+white_x = 0  # 位置ｘ
+white_y = 0  # 位置ｙ
+white_sx = 0  # 初期位置x
+white_sy = 0  # 初期位置y
+white_d = 0  # 向き
+white_sd = 0  # 初期向き
+white_a = 0  # 画像番号
+
 
 # ステージ設定処理
 def set_stage():
     global map_data, candy
     global red_sx, red_sy
+    global white_sx, white_sy, white_sd
 
     if stage == 1:
         map_data = [
@@ -63,6 +74,7 @@ def set_stage():
         candy = 32
         red_sx = 630
         red_sy = 450
+        white_sd = -1  # 出現しない
     if stage == 2:
         map_data = [
             [0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0],
@@ -78,6 +90,9 @@ def set_stage():
         candy = 38
         red_sx = 630
         red_sy = 90
+        white_sx = 330
+        white_sy = 270
+        white_sd = DIR[2]
 
     if stage == 3:
         map_data = [
@@ -94,12 +109,16 @@ def set_stage():
         candy = 23
         red_sx = 630
         red_sy = 450
+        white_sx = 330
+        white_sy = 270
+        white_sd = DIR[3]
 
 
 # キャラのスタート位置処理
 def set_chara_pos():
     global pl_x, pl_y, pl_d, pl_a
     global red_x, red_y, red_d, red_a
+    global white_x, white_y, white_d, white_a
     pl_x = 90
     pl_y = 90
     pl_d = DIR[1]
@@ -108,6 +127,10 @@ def set_chara_pos():
     red_y = red_sy
     red_d = DIR[1]
     red_a = 3
+    white_x = white_sx
+    white_y = white_sy
+    white_d = white_sd
+    white_a = 0
 
 
 # 描画処理
@@ -121,12 +144,18 @@ def draw_screen():
             )
     # プレイヤー描画
     canvas.create_image(pl_x, pl_y, image=img_pl[pl_a], tag="SCREEN")
-    # 敵描画
+    # 敵1描画
     canvas.create_image(red_x, red_y, image=img_red[red_a], tag="SCREEN")
+    # 敵2画
+    if white_sd != -1:
+        canvas.create_image(white_x, white_y, image=img_white[white_a], tag="SCREEN")
     # スコア描画
     draw_txt("SCORE " + str(score), 200, 30, 30, "white")
     # ステージ数描画処理
     draw_txt("STAGE " + str(stage), 520, 30, 30, "lime")
+    # ライフ描画処理
+    for i in range(life):
+        canvas.create_image(60 + i * 50, 500, image=img_pl[12], tag="SCREEN")
 
 
 # 文字描画処理
@@ -212,8 +241,8 @@ def move_pl():
         candy -= 1
 
 
-# 敵の移動処理
-def move_enemy():
+# 敵1の移動処理
+def move_enemy1():
     global red_x, red_y, red_d, red_a, phase, tmr
     speed = 10
     if red_x % 60 == 30 and red_y % 60 == 30:
@@ -246,9 +275,42 @@ def move_enemy():
         tmr = 0
 
 
+# 敵２の移動処理
+def move_enemy2():
+    global white_x, white_y, white_d, white_a, phase, tmr
+    speed = 5
+    if white_sd == -1:
+        return
+    if white_d == DIR[0]:
+        if check_wall(white_x, white_y, white_d, speed) == False:
+            white_y -= speed
+        else:
+            white_d = DIR[1]
+    elif white_d == DIR[1]:
+        if check_wall(white_x, white_y, white_d, speed) == False:
+            white_y += speed
+        else:
+            white_d = DIR[0]
+    elif white_d == DIR[2]:
+        if check_wall(white_x, white_y, white_d, speed) == False:
+            white_x -= speed
+        else:
+            white_d = DIR[3]
+    elif white_d == DIR[3]:
+        if check_wall(white_x, white_y, white_d, speed) == False:
+            white_x += speed
+        else:
+            white_d = DIR[2]
+    white_a = ANIMATION[tmr % 4]
+    # プレイヤーと接触判定
+    if abs(white_x - pl_x) <= 40 and abs(white_y - pl_y) <= 40:
+        phase = 2
+        tmr = 0
+
+
 # メインループ
 def main():
-    global key, koff, tmr, phase, score, stage
+    global key, koff, tmr, phase, score, stage, life
     tmr += 1
     draw_screen()
 
@@ -259,7 +321,7 @@ def main():
             draw_txt("Press SPSCE !", 360, 380, 30, "yellow")
         if key == "space":
             score = 0
-            stage = 1
+            stage = 2
             set_stage()
             set_chara_pos()
             phase = 1
@@ -267,13 +329,26 @@ def main():
     # ゲーム画面
     if phase == 1:
         move_pl()
-        move_enemy()
+        move_enemy1()
+        move_enemy2()
         if candy == 0:
             phase = 4
             tmr = 0
 
-    # ゲームオーバー
+    # ゲーム失敗
     if phase == 2:
+        draw_txt("MISS", 360, 270, 40, "orange")
+        if tmr == 1:
+            life -= 1
+        if tmr == 30:
+            if life == 0:
+                phase = 3
+                tmr = 0
+            else:
+                set_chara_pos()
+                phase = 1
+    # ゲームオーバー
+    if phase == 3:
         draw_txt("GAME OVER", 360, 270, 40, "red")
         if tmr == 50:
             phase = 0
@@ -322,8 +397,9 @@ img_pl = [
     tkinter.PhotoImage(file="images/pen09.png"),
     tkinter.PhotoImage(file="images/pen10.png"),
     tkinter.PhotoImage(file="images/pen11.png"),
+    tkinter.PhotoImage(file="images/pen_face.png"),
 ]
-# 敵
+# 敵1
 img_red = [
     tkinter.PhotoImage(file="images/red00.png"),
     tkinter.PhotoImage(file="images/red01.png"),
@@ -337,6 +413,12 @@ img_red = [
     tkinter.PhotoImage(file="images/red09.png"),
     tkinter.PhotoImage(file="images/red10.png"),
     tkinter.PhotoImage(file="images/red11.png"),
+]
+# 敵2
+img_white = [
+    tkinter.PhotoImage(file="images/white00.png"),
+    tkinter.PhotoImage(file="images/white01.png"),
+    tkinter.PhotoImage(file="images/white02.png"),
 ]
 # タイトル
 img_title = tkinter.PhotoImage(file="images/title.png")
